@@ -42,6 +42,31 @@ deploy reads exactly these:
 | `VITE_DEBUG_MODE`, `VITE_GOOGLE_SPREADSHEET_ID`, `VITE_GOOGLE_SHEETS_API_KEY` | secrets   | As used by the frontend                                                                                              |
 | `CORS_ORIGINS`, `INSTITUTIONAL_EMAIL_DOMAINS`                                 | variables | Optional; defaults apply when unset                                                                                  |
 
+Notes on these values (from checking the live site and from the site-code session; confirm before
+relying on them):
+
+- **Repository-level secrets also apply.** A secret set at the repository level is used by the
+  `vj-production` deploy unless the environment sets its own. As of 2026-09-29 the repository
+  level was reported to hold `GOOGLE_CLIENT_ID`, `PLANE_INTERNAL_TOKEN`, `PORT`,
+  `VITE_GOOGLE_CLIENT` and `VITE_GOOGLE_SPREADSHEET_ID`, and the `vj-production` environment held
+  only `PLANE_DATABASE_URL`. Still missing for production: `VITE_API_BASE_URL`, the three
+  `CLOUDINARY_*` values and `ADMIN_EMAILS`.
+- **Cloudinary.** The existing images (about 180 problem images) are served from the Cloudinary
+  cloud named `dfwj0qzvz` (visible in the image URLs). `CLOUDINARY_CLOUD_NAME` must be that cloud
+  and the API key and secret must be that account's, otherwise uploads fail and old images stay
+  on the old account only. A different, disabled cloud name in someone's local `.env` will not
+  work.
+- **Google OAuth.** The OAuth client was reported to allow only `https://www.vjstartup.com` as an
+  origin: sign-in from `https://vjstartup.com` or a preview URL fails with `redirect_uri_mismatch`
+  until those origins are added in Google Cloud Console.
+- **Check what `www` really points at.** One lookup on 2026-09-29 returned only
+  `103.248.208.120`; the site-code session's lookup also returned `202.65.141.82`. Resolvers can
+  disagree, so look up `www.vjstartup.com` at the DNS provider itself and find out what any second
+  address is before changing routes.
+- **Keep `env_file: ./backend/.env`** in `docker-compose.yml`. The backend image no longer
+  contains a `.env` (`backend/.dockerignore` excludes it), so the container gets its settings
+  only from compose.
+
 Set secrets from a terminal with `--body` (a hidden paste can silently save an empty value):
 
 ```bash
