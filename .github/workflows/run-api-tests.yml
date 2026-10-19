@@ -23,11 +23,12 @@ jobs:
       - name: Create the API env file
         run: cp apps/api/.env.example apps/api/.env
 
-      # minio/minio is no longer published on Docker Hub; the same image lives on quay.io.
-      - name: Point the compose file at MinIO's current image
+      # MinIO's public images are gone (Docker Hub and quay.io both refuse the pull), and these tests do
+      # not use object storage, so run the stack without it.
+      - name: Run the test stack without MinIO
         run: |
-          sed -i 's#image: minio/minio#image: quay.io/minio/minio#' docker-compose-test.yml
-          grep -n 'image:' docker-compose-test.yml
+          yq -i 'del(.services.test-minio) | del(.services.api-tests.depends_on.test-minio)' docker-compose-test.yml
+          grep -n 'minio' docker-compose-test.yml || echo 'no minio left in the compose file'
 
       - name: Migrations are in sync with the models, and apply cleanly
         run: |
