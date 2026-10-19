@@ -1,0 +1,45 @@
+name: Run API tests (fork only)
+
+# Runs the Django test suite against a real Postgres via docker-compose-test.yml, plus the
+# migration check, on GitHub's runners. For use on a fork; triggered by a push to
+# ci/run-api-tests or by hand. Not meant for the upstream repository.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ci/run-api-tests
+
+permissions:
+  contents: read
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create the API env file
+        run: cp apps/api/.env.example apps/api/.env
+
+      - name: Migrations are in sync with the models, and apply cleanly
+        run: |
+          docker compose -f docker-compose-test.yml run --rm --build api-tests \
+            sh -c "python manage.py makemigrations --check --dry-run && python manage.py migrate --noinput && echo MIGRATE_OK"
+
+      - name: VJ Startups unit tests
+        if: always()
+        run: |
+          docker compose -f docker-compose-test.yml run --rm api-tests \
+            pytest plane/tests/unit/vj_startups -q -p no:cacheprovider
+
+      - name: All unit tests
+        if: always()
+        run: |
+          docker compose -f docker-compose-test.yml run --rm api-tests \
+            pytest -m unit -q -p no:cacheprovider
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose-test.yml down -v
