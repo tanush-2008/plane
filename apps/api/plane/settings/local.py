@@ -10,6 +10,10 @@ from .common import *  # noqa
 
 DEBUG = True
 
+# Run Celery tasks synchronously in-process for local dev without a RabbitMQ broker running.
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+
 # Debug Toolbar settings
 INSTALLED_APPS += ("debug_toolbar",)  # noqa
 MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)  # noqa

@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "plane-api",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-File", "C:\\Users\\peddy\\plane\\apps\\api\\run_dev.ps1"],
+      "port": 8000
+    },
+    {
+      "name": "plane-web",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-File", "C:\\Users\\peddy\\plane\\apps\\web\\run_dev.ps1"],
+      "port": 3000
+    },
+    {
+      "name": "plane-admin",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-File", "C:\\Users\\peddy\\plane\\apps\\admin\\run_dev.ps1"],
+      "port": 3001
+    },
+    {
+      "name": "vj-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--prefix", "C:\\Users\\peddy\\vjstartups-main-website\\backend"],
+      "port": 6220
+    },
+    {
+      "name": "vj-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "C:\\Users\\peddy\\vjstartups-main-website\\frontend"],
+      "port": 4000
+    }
+  ]
+}

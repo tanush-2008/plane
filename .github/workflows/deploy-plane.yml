@@ -141,9 +141,36 @@ jobs:
           sed -i "s|LIVE_BASE_URL=.*|LIVE_BASE_URL=\"${DOMAIN}\"|g" apps/api/.env
 
           # Expose the Plane Proxy on port 8888 (since port 80 is heavily used)
-          sed -i 's/LISTEN_HTTP_PORT=80/LISTEN_HTTP_PORT=8888/g' .env
+                    sed -i 's/LISTEN_HTTP_PORT=80/LISTEN_HTTP_PORT=8888/g' .env
           sed -i 's/LISTEN_HTTPS_PORT=443/LISTEN_HTTPS_PORT=8443/g' .env
+
+          # Optional service passwords. The defaults in .env.example ("plane" for Postgres and
+          # RabbitMQ, "access-key"/"secret-key" for MinIO) are published in a public repository.
+          # Set the repository secrets POSTGRES_PASSWORD, RABBITMQ_PASSWORD, S3_ACCESS_KEY and
+          # S3_SECRET_KEY to replace them. Nothing changes while they are unset. Values are
+          # limited to URL-safe characters because the database password is embedded unencoded
+          # in DATABASE_URL and every value goes through sed.
+          apply_secret() { # apply_secret VARIABLE_NAME VALUE FILE...
+            local name="$1" value="$2"
+            shift 2
+            [ -n "$value" ] || return 0
+            if ! printf '%s' "$value" | grep -Eq '^[A-Za-z0-9._~-]{16,}$'; then
+              echo "::error::The secret for $name must be at least 16 characters, using only letters, digits, '.', '_', '~' and '-'."
+              exit 1
+            fi
+            for file in "$@"; do
+              sed -i "s|^${name}=.*|${name}=\"${value}\"|" "$file"
+            done
+          }
+          apply_secret POSTGRES_PASSWORD "$SVC_POSTGRES_PASSWORD" .env apps/api/.env
+          apply_secret RABBITMQ_PASSWORD "$SVC_RABBITMQ_PASSWORD" .env apps/api/.env
+          apply_secret AWS_ACCESS_KEY_ID "$SVC_S3_ACCESS_KEY" .env apps/api/.env
+          apply_secret AWS_SECRET_ACCESS_KEY "$SVC_S3_SECRET_KEY" .env apps/api/.env
         env:
+          SVC_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SVC_RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          SVC_S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          SVC_S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           VJ_MICROSERVICE_URL: ${{ vars.VJ_MICROSERVICE_URL }}
           PUBLIC_SITE_INTERNAL_TOKEN: ${{ secrets.PUBLIC_SITE_INTERNAL_TOKEN }}
