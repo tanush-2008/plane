@@ -25,7 +25,9 @@ jobs:
 
       # minio/minio is no longer published on Docker Hub; the same image lives on quay.io.
       - name: Point the compose file at MinIO's current image
-        run: sed -i 's#image: minio/minio#image: quay.io/minio/minio#' docker-compose-test.yml
+        run: |
+          sed -i 's#image: minio/minio#image: quay.io/minio/minio#' docker-compose-test.yml
+          grep -n 'image:' docker-compose-test.yml
 
       - name: Migrations are in sync with the models, and apply cleanly
         run: |
