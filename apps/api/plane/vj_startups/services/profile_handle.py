@@ -60,7 +60,8 @@ def candidate_handles(first_name, last_name, email):
     """Yield sensible handle bases for a person, best first."""
     name = slugify(f"{first_name or ''} {last_name or ''}".strip())
     local = slugify((email or "").split("@")[0])
-    for base in (name, local, "member"):
+    # "member" would be a natural last resort, but it is a reserved handle, so use "user".
+    for base in (name, local, "user"):
         base = base.strip("-")[:HANDLE_MAX_LENGTH].strip("-")
         if base:
             yield base

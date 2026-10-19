@@ -51,12 +51,13 @@ def public_site_url():
 
 def workspace_slug():
     """Slug of the global VJ Startups workspace (VJ_WORKSPACE_SLUG, default 'vj-startups')."""
-    return (os.environ.get("VJ_WORKSPACE_SLUG") or DEFAULT_WORKSPACE_SLUG).strip().lower()
+    # Strip before falling back: a setting of just spaces must mean "not set", not an empty slug.
+    return (os.environ.get("VJ_WORKSPACE_SLUG", "").strip() or DEFAULT_WORKSPACE_SLUG).lower()
 
 
 def workspace_name():
     """Display name used only if the workspace has to be created (VJ_WORKSPACE_NAME)."""
-    return (os.environ.get("VJ_WORKSPACE_NAME") or DEFAULT_WORKSPACE_NAME).strip()
+    return os.environ.get("VJ_WORKSPACE_NAME", "").strip() or DEFAULT_WORKSPACE_NAME
 
 
 def institutional_email_domains():

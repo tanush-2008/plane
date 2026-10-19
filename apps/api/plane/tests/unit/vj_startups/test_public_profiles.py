@@ -40,7 +40,8 @@ class TestHandles:
         assert handles.suggest_handle("", "", "kiran.k@x.in", lambda h, e: False) == "kirank"
 
     def test_suggestion_still_works_for_a_nameless_account(self):
-        assert handles.suggest_handle("", "", "", lambda h, e: False) == "member"
+        assert handles.suggest_handle("", "", "", lambda h, e: False) == "user"
+        assert handles.suggest_handle("", "", "", lambda h, e: h == "user") == "user2"
 
     def test_suggestion_stays_within_the_length_limit(self):
         handle = handles.suggest_handle("A" * 50, "", "", lambda h, e: h == "a" * 30)
