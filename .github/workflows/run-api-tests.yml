@@ -23,6 +23,10 @@ jobs:
       - name: Create the API env file
         run: cp apps/api/.env.example apps/api/.env
 
+      # minio/minio is no longer published on Docker Hub; the same image lives on quay.io.
+      - name: Point the compose file at MinIO's current image
+        run: sed -i 's#image: minio/minio#image: quay.io/minio/minio#' docker-compose-test.yml
+
       - name: Migrations are in sync with the models, and apply cleanly
         run: |
           docker compose -f docker-compose-test.yml run --rm --build api-tests \
